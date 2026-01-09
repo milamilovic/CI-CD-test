@@ -9,6 +9,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      POSTGRES_DB: dockerplatform
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_HOST: localhost
+
     defaults:
       run:
         working-directory: backend
@@ -23,16 +30,21 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Cache Maven packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('backend/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
+      - name: Start infrastructure (Postgres)
+        run: |
+          docker compose up -d
 
-      - name: Build backend
-        run: mvn clean install
+      - name: Wait for Postgres to be ready
+        run: |
+          until docker exec postgres pg_isready -U testuser; do
+            echo "Waiting for postgres..."
+            sleep 2
+          done
 
-      - name: Run tests
-        run: mvn test
+      - name: Build and run tests
+        run: mvn clean test
+
+      - name: Stop infrastructure
+        if: always()
+        run: docker compose down -v
+        working-directory: backend
