@@ -8,7 +8,6 @@ class DockerPlatformBackendApplicationTests {
 
 	@Test
 	void contextLoads() {
-		System.out.println("Test uspesno pokrenut!");
 	}
 
 }
