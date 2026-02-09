@@ -74,8 +74,6 @@ jobs:
 
       - name: Run unit tests
         run: mvn test -Dtest="**/*Test.java,!**/*IntegrationTest.java" -DfailIfNoTests=false
-        continue-on-error: false
 
       - name: Run integration tests
         run: mvn test -Dtest="**/*IntegrationTest.java" -DfailIfNoTests=false
-        continue-on-error: false

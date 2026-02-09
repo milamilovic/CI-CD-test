@@ -68,11 +68,18 @@ jobs:
             sleep 2
           done
 
+      - name: Verify PostgreSQL connection
+        run: |
+          PGPASSWORD=postgres psql -h localhost -U postgres -d dockerplatform -c "SELECT version();"
+
       - name: Build backend
         run: mvn clean compile -DskipTests
 
-      - name: Run tests
-        run: mvn test
+      - name: Run unit tests
+        run: mvn test -Dtest="**/*Test.java,!**/*IntegrationTest.java" -DfailIfNoTests=false
+
+      - name: Run integration tests
+        run: mvn test -Dtest="**/*IntegrationTest.java" -DfailIfNoTests=false
 
   build-and-push-backend:
     name: Build and Push Backend Image
